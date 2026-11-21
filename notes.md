@@ -210,4 +210,6 @@ int s = socket(res->ai_family, res->ai_socktype, res->ai_protocol)
 
 s is socket descriptor that we can use in later syscalls, or -1 on error (check errno). It's not useful by itself.
 
+test
+
 https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html
