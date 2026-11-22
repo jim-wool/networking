@@ -1,2 +1,2 @@
 #!/bin/bash
-gcc -o $1 $1.c -Wall -Wextra -Werror
+gcc -o $1 $1.c

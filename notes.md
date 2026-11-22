@@ -256,7 +256,86 @@ freeaddrinfo();
 it returns a brand new socket fd to use for this single connection. Now you have 2 socket fds for the price of one (lmao idk why i copied this bit too). The original one is still listening for more new connections, the newly created one is ready to send() and recv().
 
 ```c
-int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
+int new_fd = accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
 ```
+
+we will use the new_fd file descriptor for all send() and recv() calls. If you're only getting one single connection EVER, you can close() the listening sockfd in order to prevent more incoming connections on the same port.
+
+### send() and recv()
+
+these are used for communicating over stream sockets (connected). If you want to use regular unconnected datagram sockets you'll need sendto() and recvfrom().
+
+The calls discussed in this section are blocking, meaning recv() will block until there is some data ready to receive (your program will stop on that syscall until someone sends you something, the OS is actually sleeping). send() can also block on rare occasions.
+
+```c
+int send(int sockfd, const void *msg, int len, int flags);
+```
+
+sockfd is the descriptor you want to send data to (from socket() or accept()). flags is usually set to 0 (see man page)
+
+send() returns the number of bytes actually sent out. It might be less than the number you told it to send, so it trusts you to send the rest later. -1 is returned on error like every other goddamn syscall here and use errno.
+
+```c
+int recv(int sockfd, void *buf, int len, int flags);
+```
+
+recv() returns the number of bytes actually read into the buffer or -1 on error.
+
+a 0 means that the remote side has closed the connection.
+
+### sendto() and recvfrom(), DGRAM style
+
+```c
+int sendto(int sockfd, const void *msg, int len, unsigned int flags, const struct sockaddr *to, socklen_t tolen);
+```
+
+to get our hands on the destination addr structn we'll probably either get it from getaddrinfo() or from recvfrom() or we'll fill it out by hand like the good boys we are.
+
+same returns.
+
+```c
+int recvfrom(int sockfd, void *buf, int len, unsigned int flags, struct sockaddr *from, int *fromlen);
+```
+
+struct sockaddr_storage is a way to deal with both IPv4 and IPv6 because it's big enough for either.
+
+### close() and shutdown()
+
+```c
+int close(int fd);
+```
+
+This will prevent any more reads and writes to the socket. Anyone attempting to read or write the socket on the remote end will receive an error.
+
+shutdown() allows you to cut off communication in a certain direction or both ways:
+
+```c
+int shutdown(int sockfd, int how);
+// how:
+// 0: no more receives
+// 1: no more sends
+// 2: no more both
+// returns 0 on success and -1 on error
+```
+
+### getpeername()
+
+who are you?
+
+```c
+int getpeername(int sockfd, struct sockaddr *addr, int *addrlen);
+```
+
+once we have the address we can use inet_ntop() or getnameinfo() or gethostbyaddr() to get more information. 
+
+### gethostname()
+
+who am I?
+
+```c
+int gethostname(char *hostname, size_t size);
+```
+
+hostname is where to store the actual name and size is the size of hostname.
 
 https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html
