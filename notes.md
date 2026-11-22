@@ -186,7 +186,7 @@ hints point to a struct addrinfo that you've already filled out with relevant in
 
 AI_PASSIVE flag tells getaddrinfo() to assign the address of my local host to the socket structures
 
-### socket() get the file descriptor
+### socket() - get the file descriptor
 
 ```c
 #include <sys/types.h>
@@ -210,6 +210,53 @@ int s = socket(res->ai_family, res->ai_socktype, res->ai_protocol)
 
 s is socket descriptor that we can use in later syscalls, or -1 on error (check errno). It's not useful by itself.
 
-test
+### bind() - what port?
+
+Once we have a socket, we might have to associate it with a port on the machine, this is commonly done if we want to listen() for incoming connections on a specific port. If we're just going to connect(), then we don't need the port.
+
+```c
+int bind(int sockfd, struct sockaddr *my_addr, int addrlen);
+```
+
+Sometimes rerunning a server might trigger a bind() failure, with the error that the address is already in use, meaning a little bit of the socket that was connected is still hanging around in the kernel, a workaround could be the following:
+
+```c
+int yes = 1;
+setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes))
+```
+
+### connect()
+
+```c
+int connect(int sockfd, struct sockaddr *serv_addr, int addrlen);
+```
+
+### listen()
+
+You want to wait for incoming connections and handle them in some way:
+
+```c
+int listen(int sockfd, int backlog);
+```
+
+backlog: the number of connections allowed on the incoming queue. Incoming connections will wait in this queue until we accept() them and this is the limit of how many we can queue.
+
+You need to call bind() before calling listen() so that the server is running on a specific port.
+
+```c
+getaddrinfo();
+socket();
+bind();
+listen();
+freeaddrinfo();
+```
+
+### accept()
+
+it returns a brand new socket fd to use for this single connection. Now you have 2 socket fds for the price of one (lmao idk why i copied this bit too). The original one is still listening for more new connections, the newly created one is ready to send() and recv().
+
+```c
+int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen)
+```
 
 https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html
