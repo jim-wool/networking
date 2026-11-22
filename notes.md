@@ -343,3 +343,12 @@ hostname is where to store the actual name and size is the size of hostname.
 Often there will only be one server on a machine and that server will handle multiple clients using fork(). The basic routine is the following:
 server will wait for a connection, accept() it, and fork() a child process to handle it.
 
+### Datagram sockets
+
+**listener** sits on a machine waiting for an incoming packet on a port. **talker** sends a packet to that port, on the specified machine, that contains whatever the user enters on the command line. (an example bruh)
+
+We're gonna tell the client and server to use specifically IPv6 to avoid the situation where the server is listening on IPv6 and the client sends on IPv4; The data simply would not be received
+
+we don't need to listen() or accept() in this case.
+
+https://beej.us/guide/bgnet/html/split/client-server-background.html
