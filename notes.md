@@ -338,4 +338,8 @@ int gethostname(char *hostname, size_t size);
 
 hostname is where to store the actual name and size is the size of hostname.
 
-https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html
+## 6 Client-Server Background
+
+Often there will only be one server on a machine and that server will handle multiple clients using fork(). The basic routine is the following:
+server will wait for a connection, accept() it, and fork() a child process to handle it.
+
