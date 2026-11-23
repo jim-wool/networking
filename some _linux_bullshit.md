@@ -1,4 +1,4 @@
-dickinbaus WxeAHS93IVIkW6pz
+dickinbaus 
 - cd:
 	.: dir im at
 	..: dir one level up
